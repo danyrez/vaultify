@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User { // Usuario
+  id          Int @id @default(autoincrement())
+  name        String          // nombre
+  email       String  @unique // correo
+  password    String          // contrasena
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  products    Product[]  // producto
+  categories  Category[] // categoria
+  sales       Sale[]     // venta
+  purchases   Purchase[] // compra
+  customers   Customer[] // cliente
+  suppliers   Supplier[] // proveedor
+}
+
+model Product { // Producto
+  id            Int @id @default(autoincrement())
+  name          String  // nombre
+  description   String
+  price         Float   // precio
+  stock         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  categoryId    Int      // categoriaId
+  userId        Int      // usuarioId
+
+  // Relaciones
+  user          User     @relation(fields: [userId], references: [id]) // usuario
+  category      Category @relation(fields: [categoryId], references: [id]) // categoria
+  saleDetails   SaleDetail[] // detalleVenta
+  purchaseDetails PurchaseDetail[] // detalleCompra
+}
+
+model Category { // Categoria
+  id            Int @id @default(autoincrement())
+  name          String  // nombre
+  totalProducts Int @default(0)    // totalProductos
+  userId        Int     // usuarioId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relaciones
+  user        User     @relation(fields: [userId], references: [id]) // usuario
+  products    Product[] // product
+}
+
+model Sale { // Venta
+  id            Int @id @default(autoincrement())
+  customerId    Int      // clienteId
+  totalAmount   Float    // importeTotal
+  saleDate      DateTime // ventaFecha
+  userId        Int      // usuarioId
+
+  // Relaciones 
+  user          User     @relation(fields: [userId], references: [id]) // usuario
+  customer      Customer @relation(fields: [customerId], references: [id]) // cliente
+  saleDetails   SaleDetail[] // detalleVenta
+}
+
+model Purchase { // Compra
+  id            Int @id @default(autoincrement())
+  supplierId    Int      // proveedorId
+  totalAmount   Float    // importeTotal
+  purchaseDate  DateTime // fechaCompra
+  userId        Int      // userId
+  
+  // Relaciones
+  user          User     @relation(fields: [userId], references: [id]) // usuario
+  supplier      Supplier @relation(fields: [supplierId], references: [id]) // proveedor
+  purchaseDetails PurchaseDetail[] // detalleCompra
+}
+
+model SaleDetail { // DetalleVenta
+  id         Int @id @default(autoincrement())
+  saleId     Int      // ventaId
+  productId  Int      // productoId
+  quantity   Int      // cantidad
+  price      Float    // precio
+
+  // Relaciones
+  sale       Sale     @relation(fields: [saleId], references: [id]) // venta
+  product    Product  @relation(fields: [productId], references: [id]) // producto
+}
+
+model PurchaseDetail { // DetalleCompra
+  id         Int @id @default(autoincrement())
+  purchaseId Int      // compraId
+  productId  Int      // productoId
+  quantity   Int      // cantidad
+  price      Float    // precio
+
+  // Relaciones
+  purchase   Purchase @relation(fields: [purchaseId], references: [id]) // compra
+  product    Product  @relation(fields: [productId], references: [id]) // producto
+}
+
+model Customer { // Cliente
+  id         Int @id @default(autoincrement())
+  firstName  String  // nombre
+  lastName   String  // apellido
+  email      String  // correo
+  phone      String  // telefono
+  userId     Int     // usuarioId
+  // Relaciones
+  user       User    @relation(fields: [userId], references: [id]) // usuario
+  sales      Sale[]  // venta
+}
+
+model Supplier { // Proveedor
+  id         Int @id @default(autoincrement())
+  name       String  // nombre
+  email      String  // correo
+  phone      String  // telefono
+  address    String  // direccion
+  userId     Int     // usuarioId
+  
+  // Relaciones
+  user       User      @relation(fields: [userId], references: [id]) // usuario
+  purchases  Purchase[] // compra
+}

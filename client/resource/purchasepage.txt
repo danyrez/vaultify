@@ -1,0 +1,176 @@
+import { useEffect, useState } from "react";
+import { usePurchases } from "../../context/PurchaseContext";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
+
+export default function PurchasePage() {
+  const { purchases, getPurchases, createPurchase } = usePurchases();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [supplierId, setSupplierId] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [purchaseDetails, setPurchaseDetails] = useState([
+    { productId: "", quantity: "", price: "" },
+  ]);
+
+  useEffect(() => {
+    getPurchases();
+  }, []);
+
+  const handleAddDetail = () => {
+    setPurchaseDetails([
+      ...purchaseDetails,
+      { productId: "", quantity: "", price: "" },
+    ]);
+  };
+
+  const handleDetailChange = (index, field, value) => {
+    const updatedDetails = purchaseDetails.map((detail, i) =>
+      i === index ? { ...detail, [field]: value } : detail
+    );
+    setPurchaseDetails(updatedDetails);
+  };
+
+  const handleCreatePurchase = async () => {
+    const formattedDate = dayjs(purchaseDate).toISOString();
+
+    const purchase = {
+      supplierId: parseInt(supplierId),
+      purchaseDate: formattedDate,
+      purchaseDetails: purchaseDetails.map((detail) => ({
+        productId: parseInt(detail.productId),
+        quantity: parseInt(detail.quantity),
+        price: parseFloat(detail.price),
+      })),
+    };
+
+    console.log("Datos de la compra a enviar:", purchase); // Verifica los datos aquí
+
+    try {
+      await createPurchase(purchase);
+      setIsModalOpen(false);
+      setSupplierId("");
+      setPurchaseDate("");
+      setPurchaseDetails([{ productId: "", quantity: "", price: "" }]);
+      getPurchases(); // Actualiza la lista de compras
+    } catch (error) {
+      console.error("Error al crear la compra:", error.response.data);
+    }
+  };
+
+  return (
+    <div className='container mx-auto p-4'>
+      <h1 className='text-2xl font-bold mb-4 text-center'>COMPRAS</h1>
+      <div className='py-5'>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+        >
+          Agregar Compra
+        </button>
+      </div>
+
+      {isModalOpen && (
+        <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='bg-white p-6 rounded-md max-w-md w-full'>
+            <h2 className='text-lg font-semibold mb-4'>Nueva Compra</h2>
+            <label className='block mb-2'>Proveedor ID:</label>
+            <input
+              type='number'
+              value={supplierId}
+              onChange={(e) => setSupplierId(e.target.value)}
+              className='w-full p-2 border rounded mb-4'
+            />
+            <label className='block mb-2'>Fecha de Compra:</label>
+            <input
+              type='date'
+              value={purchaseDate}
+              onChange={(e) => setPurchaseDate(e.target.value)}
+              className='w-full p-2 border rounded mb-4'
+            />
+            <h3 className='font-semibold mb-2'>Detalles de Compra:</h3>
+            {purchaseDetails.map((detail, index) => (
+              <div key={index} className='mb-4'>
+                <label className='block'>Producto ID:</label>
+                <input
+                  type='number'
+                  value={detail.productId}
+                  onChange={(e) =>
+                    handleDetailChange(index, "productId", e.target.value)
+                  }
+                  className='w-full p-2 border rounded mb-2'
+                />
+                <label className='block'>Cantidad:</label>
+                <input
+                  type='number'
+                  value={detail.quantity}
+                  onChange={(e) =>
+                    handleDetailChange(index, "quantity", e.target.value)
+                  }
+                  className='w-full p-2 border rounded mb-2'
+                />
+                <label className='block'>Precio:</label>
+                <input
+                  type='number'
+                  step='0.01'
+                  value={detail.price}
+                  onChange={(e) =>
+                    handleDetailChange(index, "price", e.target.value)
+                  }
+                  className='w-full p-2 border rounded mb-2'
+                />
+              </div>
+            ))}
+            <button
+              onClick={handleAddDetail}
+              className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4'
+            >
+              Agregar Detalle
+            </button>
+            <div className='flex justify-end'>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className='bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2'
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreatePurchase}
+                className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+              >
+                Crear Compra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className='overflow-x-auto'>
+        <table className='min-w-full bg-white border border-gray-200 rounded-xl'>
+          <thead>
+            <tr>
+              <th className='py-2 px-4 border-b'>#</th>
+              <th className='py-2 px-4 border-b'>Proveedor</th>
+              <th className='py-2 px-4 border-b'>Monto Total</th>
+              <th className='py-2 px-4 border-b'>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {purchases.map((purchase) => (
+              <tr key={purchase.id} className='hover:bg-gray-100 text-center'>
+                <td className='py-2 px-4 border-b'>{purchase.id}</td>
+                <td className='py-2 px-4 border-b'>{purchase.supplierId}</td>
+                <td className='py-2 px-4 border-b'>{purchase.totalAmount}</td>
+                <td className='py-2 px-4 border-b'>
+                  {dayjs(purchase.purchaseDate).utc().format("MMMM DD, YYYY")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

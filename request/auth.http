@@ -1,0 +1,150 @@
+@BASE_URL = http://localhost:3000/api
+
+POST {{BASE_URL}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "user1",
+  "email": "user1@gmail.com",
+  "password": "user123"
+}
+###
+POST {{BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user1@gmail.com",
+  "password": "user123"
+}
+###
+GET {{BASE_URL}}/auth/profile
+###
+POST {{BASE_URL}}/auth/logout
+###
+
+GET {{BASE_URL}}/categories
+###
+
+POST {{BASE_URL}}/categories
+Content-Type: application/json
+
+{
+  "name": "category1"
+}
+###
+PUT {{BASE_URL}}/categories/2
+Content-Type: application/json
+
+{
+  "name": "Componentes"
+}
+###
+GET {{BASE_URL}}/products
+###
+
+POST {{BASE_URL}}/products
+Content-Type: application/json
+
+{
+  "name": "Iphone 16",
+  "description": "Descripción del Iphone 16",
+  "price": 100,
+  "stock": 50,
+  "categoryId": 1
+}
+###
+PUT {{BASE_URL}}/products/1
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "description": "Laptop lenovo",
+  "price": 100,
+  "stock": 30,
+  "categoryId": 1
+}
+###
+GET {{BASE_URL}}/products/category/2
+###
+GET {{BASE_URL}}/customers
+###
+POST  {{BASE_URL}}/customers
+Content-Type: application/json
+
+{
+  "firstName" : "customer1",
+  "lastName" : "LastName1",
+  "email" : "custormer1@gmail.com",
+  "phone" : "123456789"
+}
+###
+GET {{BASE_URL}}/suppliers
+###
+POST {{BASE_URL}}/suppliers
+Content-Type: application/json
+
+{
+  "name": "supplier1",
+  "email": "supplier1@gmail.com",
+  "phone": "123456789",
+  "address": "Dirección del proveedor"
+}
+###
+GET {{BASE_URL}}/sales
+###
+POST {{BASE_URL}}/sales
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "saleDate": "2024-10-25T00:00:00Z",
+  "saleDetails": [
+    {
+      "productId": 1,
+      "quantity": 3,
+      "price": 100
+    }
+  ]
+}
+###
+PUT {{BASE_URL}}/sales/1
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "saleDate": "2024-10-25T00:00:00Z",
+  "saleDetails": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "price": 100
+    }
+  ]
+}
+###
+GET {{BASE_URL}}/purchases
+###
+POST  {{BASE_URL}}/purchases
+Content-Type: application/json
+
+{
+  "supplierId": 2,
+  "purchaseDate": "2024-11-15T00:00:00Z",
+  "purchaseDetails":[
+    {
+      "productId": 2,
+      "quantity": 5,
+      "price": 150
+    }
+  ]
+}
+###
+DELETE {{BASE_URL}}/ppurchases/10
+
+###
+GET {{BASE_URL}}/purchase-details/
+###
+GET {{BASE_URL}}/sale-details
+###
+
+GET {{BASE_URL}}/stats
