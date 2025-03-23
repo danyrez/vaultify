@@ -16,4 +16,6 @@ app.use(express.json())
 app.use(cookieParser())
 app.use('/api', routes)
 
+app.set('trust proxy', process.env.NODE_ENV === 'production')
+
 export default app
